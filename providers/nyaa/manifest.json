@@ -1,0 +1,30 @@
+{
+  "id": "nyaa",
+  "name": "Nyaa",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Крупнейший мировой торрент-трекер аниме и японского медиа",
+  "author": "Nyaa Community",
+  "homepage": "https://nyaa.si",
+  "icon": "icon.png",
+  "capabilities": [
+    "TORRENT"
+  ],
+  "hosts": [
+    "nyaa.si",
+    "nyaa.land"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.NyaaTracker",
+  "settings": "settings.json",
+  "pros": [
+    "Максимальное качество BDRip и Remux",
+    "Большой сид-пул"
+  ],
+  "cons": [
+    "Преимущественно английские сабы"
+  ]
+}

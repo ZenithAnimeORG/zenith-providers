@@ -1,0 +1,28 @@
+{
+  "id": "opensubtitles",
+  "name": "OpenSubtitles",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Глобальная база субтитров на всех языках мира",
+  "author": "OpenSubtitles",
+  "homepage": "https://opensubtitles.com",
+  "icon": "icon.png",
+  "capabilities": [
+    "SUBTITLES"
+  ],
+  "hosts": [
+    "api.opensubtitles.com"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.OpenSubtitlesProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Миллионы субтитров на десятках языков"
+  ],
+  "cons": [
+    "Лимит запросов без API-ключа"
+  ]
+}

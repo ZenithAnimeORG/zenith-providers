@@ -1,0 +1,30 @@
+{
+  "id": "rutracker",
+  "name": "RuTracker",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Крупнейший русскоязычный торрент-трекер с верифицированными раздачами",
+  "author": "RuTracker Community",
+  "homepage": "https://rutracker.org",
+  "icon": "icon.png",
+  "capabilities": [
+    "TORRENT"
+  ],
+  "hosts": [
+    "rutracker.org",
+    "rutracker.net"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.RuTrackerTracker",
+  "settings": "settings.json",
+  "pros": [
+    "Огромная база",
+    "Высокие скорости сидеров"
+  ],
+  "cons": [
+    "Требуется аккаунт для скачивания"
+  ]
+}

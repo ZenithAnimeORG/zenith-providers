@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "type": "text",
+      "key": "api_key",
+      "title": "API Key",
+      "description": "Ключ OpenSubtitles",
+      "defaultValue": "",
+      "isSecret": true
+    }
+  ]
+}

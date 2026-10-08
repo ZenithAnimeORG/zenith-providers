@@ -1,0 +1,28 @@
+{
+  "id": "animeskip",
+  "name": "AnimeSkip",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Точные временные метки эпизодов и глав от сообщества AnimeSkip",
+  "author": "AnimeSkip",
+  "homepage": "https://anime-skip.com",
+  "icon": "icon.png",
+  "capabilities": [
+    "SKIP_TIMINGS"
+  ],
+  "hosts": [
+    "api.anime-skip.com"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnimeSkipProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Детальные сегменты эпизодов"
+  ],
+  "cons": [
+    "Требуется Client ID для расширенного доступа"
+  ]
+}

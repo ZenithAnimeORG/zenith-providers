@@ -1,0 +1,29 @@
+{
+  "id": "aniskip",
+  "name": "AniSkip",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Автоматический пропуск опенингов и эндингов через базу AniSkip",
+  "author": "AniSkip",
+  "homepage": "https://aniskip.com",
+  "icon": "icon.png",
+  "capabilities": [
+    "SKIP_TIMINGS"
+  ],
+  "hosts": [
+    "api.aniskip.com"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AniSkipProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Мгновенный пропуск опенингов",
+    "Огромная база"
+  ],
+  "cons": [
+    "Редкие неточности таймингов"
+  ]
+}

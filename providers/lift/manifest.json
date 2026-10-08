@@ -1,0 +1,31 @@
+{
+  "id": "lift",
+  "name": "Lift",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Мульти-аудио стримы и оригинальные субтитры",
+  "author": "Zenith Community",
+  "homepage": "https://lift.to",
+  "icon": "icon.png",
+  "capabilities": [
+    "MEDIA_SOURCE",
+    "SUBTITLES"
+  ],
+  "hosts": [
+    "api.lift.to",
+    "lift.to"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.LiftProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Отличное качество субтитров",
+    "Поддержка аудиодорожек"
+  ],
+  "cons": [
+    "Некоторые потоки требуют обхода блокировок"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "anilibria",
+  "name": "AniLibria",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Официальные релизы и торренты от команды AniLibria",
+  "author": "AniLibria Team",
+  "homepage": "https://anilibria.top",
+  "icon": "icon.png",
+  "capabilities": [
+    "MEDIA_SOURCE",
+    "TRACKER"
+  ],
+  "hosts": [
+    "anilibria.top",
+    "api.anilibria.tv",
+    "anilibria.tv"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AniLibertyProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Высокое качество озвучки",
+    "Прямые торрент-раздачи"
+  ],
+  "cons": [
+    "Только релизы AniLibria"
+  ]
+}

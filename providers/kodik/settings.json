@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "type": "text",
+      "key": "api_token",
+      "title": "API Токен Kodik",
+      "description": "Оставьте пустым для встроенного",
+      "defaultValue": "",
+      "isSecret": true
+    }
+  ]
+}

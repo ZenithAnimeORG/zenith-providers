@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "type": "text",
+      "key": "username",
+      "title": "Имя пользователя",
+      "description": "Логин RuTracker",
+      "defaultValue": "",
+      "isSecret": false
+    },
+    {
+      "type": "text",
+      "key": "password",
+      "title": "Пароль",
+      "description": "Пароль RuTracker",
+      "defaultValue": "",
+      "isSecret": true
+    }
+  ]
+}

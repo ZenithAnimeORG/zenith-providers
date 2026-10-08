@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "type": "text",
+      "key": "client_id",
+      "title": "Client ID",
+      "description": "AnimeSkip Client ID",
+      "defaultValue": "",
+      "isSecret": false
+    }
+  ]
+}

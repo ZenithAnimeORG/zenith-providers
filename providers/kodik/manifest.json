@@ -1,0 +1,33 @@
+{
+  "id": "kodik",
+  "name": "Kodik",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Основной агрегатор большинства озвучек и плееров",
+  "author": "Zenith Community",
+  "homepage": "https://kodik.info",
+  "icon": "icon.png",
+  "capabilities": [
+    "MEDIA_SOURCE"
+  ],
+  "hosts": [
+    "kodik.info",
+    "kodik.biz",
+    "kodik.cc",
+    "kodik-api.com",
+    "kodikplayer.com"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.KodikProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Огромный выбор плееров и озвучек",
+    "Быстрая загрузка потоков"
+  ],
+  "cons": [
+    "Максимальное качество в 720p"
+  ]
+}

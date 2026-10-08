@@ -1,0 +1,28 @@
+{
+  "id": "theintrodb",
+  "name": "TheIntroDb",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "База таймингов интро и аутро сериалов",
+  "author": "TheIntroDb",
+  "homepage": "https://theintrodb.org",
+  "icon": "icon.png",
+  "capabilities": [
+    "SKIP_TIMINGS"
+  ],
+  "hosts": [
+    "api.theintrodb.org"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.TheIntroDbProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Открытая база таймингов"
+  ],
+  "cons": [
+    "Меньше аниме-тайтлов чем в AniSkip"
+  ]
+}

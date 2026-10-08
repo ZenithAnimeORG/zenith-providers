@@ -1,0 +1,30 @@
+{
+  "id": "animego",
+  "name": "AnimeGo",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Каталог аниме с плеерами AniBoom, Kodik и Kinescope",
+  "author": "Zenith Community",
+  "homepage": "https://animego.org",
+  "icon": "icon.png",
+  "capabilities": [
+    "MEDIA_SOURCE"
+  ],
+  "hosts": [
+    "animego.org",
+    "animego.me"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnimeGoProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Удобный каталог",
+    "Плееры AniBoom"
+  ],
+  "cons": [
+    "Частая смена зеркал"
+  ]
+}

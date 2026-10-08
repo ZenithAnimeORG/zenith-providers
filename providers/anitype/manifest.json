@@ -1,0 +1,31 @@
+{
+  "id": "anitype",
+  "name": "Anitype",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Современный аниме-трекер и каталог с синхронизацией списков",
+  "author": "Anitype Team",
+  "homepage": "https://anitype.site",
+  "icon": "icon.png",
+  "capabilities": [
+    "MEDIA_SOURCE",
+    "TRACKER"
+  ],
+  "hosts": [
+    "api.anitype.site",
+    "anitype.site"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnitypeProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Чистый API",
+    "Быстрые обновления"
+  ],
+  "cons": [
+    "Ограниченная библиотека редких тайтлов"
+  ]
+}

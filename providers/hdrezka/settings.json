@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "type": "text",
+      "key": "login",
+      "title": "Логин",
+      "description": "Логин HDRezka",
+      "defaultValue": "",
+      "isSecret": false
+    },
+    {
+      "type": "text",
+      "key": "password",
+      "title": "Пароль",
+      "description": "Пароль HDRezka",
+      "defaultValue": "",
+      "isSecret": true
+    }
+  ]
+}

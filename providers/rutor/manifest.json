@@ -1,0 +1,30 @@
+{
+  "id": "rutor",
+  "name": "RuTor",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Открытый русскоязычный торрент-трекер без регистрации",
+  "author": "RuTor Community",
+  "homepage": "https://rutor.info",
+  "icon": "icon.png",
+  "capabilities": [
+    "TORRENT"
+  ],
+  "hosts": [
+    "rutor.info",
+    "rutor.is"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.RuTorTracker",
+  "settings": "settings.json",
+  "pros": [
+    "Русские озвучки",
+    "Не требуется логин"
+  ],
+  "cons": [
+    "Меньше раздач чем на RuTracker"
+  ]
+}

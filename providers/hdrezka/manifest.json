@@ -1,0 +1,32 @@
+{
+  "id": "hdrezka",
+  "name": "HDRezka",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Крупнейший кинотеатр с оригинальными озвучками и высоким битрейтом",
+  "author": "Zenith Community",
+  "homepage": "https://hdrezka.me",
+  "icon": "icon.png",
+  "capabilities": [
+    "MEDIA_SOURCE"
+  ],
+  "hosts": [
+    "hdrezka.me",
+    "rezka.ag",
+    "hdrezka.ag",
+    "hdrzk.org"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.HdRezkaProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Высокое качество до 1080p Ultra",
+    "Быстрый выход серий"
+  ],
+  "cons": [
+    "Требуется авторизация для 1080p"
+  ]
+}

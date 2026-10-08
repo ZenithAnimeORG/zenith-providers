@@ -1,0 +1,30 @@
+{
+  "id": "yummyanime",
+  "name": "YummyAnime",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Агрегатор аниме с поддержкой плееров Sibnet, Kodik и Alloha",
+  "author": "Zenith Community",
+  "homepage": "https://yummyanime.tv",
+  "icon": "icon.png",
+  "capabilities": [
+    "MEDIA_SOURCE"
+  ],
+  "hosts": [
+    "yummyanime.tv",
+    "yummy-anime.ru"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.YummyAnimeProvider",
+  "settings": "settings.json",
+  "pros": [
+    "Большая база аниме",
+    "Множество зеркал"
+  ],
+  "cons": [
+    "Разное качество плееров"
+  ]
+}

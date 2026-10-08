@@ -1,6 +1,7 @@
 package com.pilldev.zenith.providers.builtin.provider
 
 import com.pilldev.zenith.domain.model.toProviderMirrorSpec
+import com.pilldev.zenith.domain.repository.AppDispatchers
 import com.pilldev.zenith.provider.BaseZenithProvider
 import com.pilldev.zenith.provider.MediaSourceProvider
 import com.pilldev.zenith.provider.PosterSourceProvider
@@ -15,15 +16,22 @@ import com.pilldev.zenith.provider.model.ProviderTestResult
 import com.pilldev.zenith.provider.model.ProviderVideoSource
 import com.pilldev.zenith.provider.model.measureTest
 import com.pilldev.zenith.provider.net.UrlNormalizer
+import com.pilldev.zenith.providers.builtin.api.YummyAnimeApi
 import com.pilldev.zenith.providers.builtin.api.YummyAnimeResult
 import com.pilldev.zenith.providers.builtin.mapper.toProviderVideoSource
 import com.pilldev.zenith.providers.builtin.parser.YummyAnimeParser
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.serialization.json.Json
 
 public open class YummyAnimeProvider(
-    private val yummyAnimeParser: YummyAnimeParser,
+    private var yummyAnimeParser: YummyAnimeParser? = null,
 ) : BaseZenithProvider(),
     MediaSourceProvider,
     PosterSourceProvider {
+
+    constructor() : this(null)
+
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.YUMMYANIME,
@@ -41,14 +49,58 @@ public open class YummyAnimeProvider(
                         defaultValue = "api.yani.tv",
                         description = "API endpoint или зеркало",
                     ),
+                    ProviderSettingSpec(
+                        key = "public_token",
+                        label = "Public Token",
+                        type = com.pilldev.zenith.provider.model.SettingType.PASSWORD,
+                        description = "Публичный токен YummyAnime API (оставьте пустым для встроенного)",
+                    ),
+                    ProviderSettingSpec(
+                        key = "private_token",
+                        label = "Private Token",
+                        type = com.pilldev.zenith.provider.model.SettingType.PASSWORD,
+                        description = "Приватный токен авторизации YummyAnime API (оставьте пустым для встроенного)",
+                    ),
                 ),
             mirrors = com.pilldev.zenith.domain.model.StandardMirrors.YUMMY_ANIME
                 .map { it.toProviderMirrorSpec() },
         )
 
+    private fun ensureParser(): YummyAnimeParser {
+        val existing = yummyAnimeParser
+        if (existing != null) return existing
+
+        val ctx = context
+        val client = ctx?.httpClient ?: HttpClient()
+        val api = YummyAnimeApi(
+            client = client,
+            playerSettingsManager = null,
+            getPublicToken = { ctx?.getSetting("public_token")?.trim().orEmpty() },
+            getPrivateToken = { ctx?.getSetting("private_token")?.trim().orEmpty() },
+        )
+        val parser = YummyAnimeParser(
+            yummyAnimeApi = api,
+            json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                coerceInputValues = true
+            },
+            playerSettingsManager = null,
+            appDispatchers = object : AppDispatchers {
+                override val main = Dispatchers.Main
+                override val io = Dispatchers.IO
+                override val default = Dispatchers.Default
+                override val unconfined = Dispatchers.Unconfined
+            },
+        )
+        yummyAnimeParser = parser
+        return parser
+    }
+
     override suspend fun test(context: ProviderContext): ProviderTestResult =
         measureTest {
-            val result = yummyAnimeParser.getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
+            val parser = ensureParser()
+            val result = parser.getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
             "YummyAnime API активен. Найдено озвучек: ${result.sources.size}"
         }
 
@@ -58,7 +110,8 @@ public open class YummyAnimeProvider(
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = yummyAnimeParser.getSources(shikimoriId, animeName, russianName)
+            val parser = ensureParser()
+            val result = parser.getSources(shikimoriId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 
@@ -67,9 +120,10 @@ public open class YummyAnimeProvider(
         animeName: String,
     ): ProviderResult<String?> =
         ProviderResult.of {
+            val parser = ensureParser()
             val cleanName = AnimeTitleMatcher.cleanForSearch(animeName)
-            val yummySearchElement = yummyAnimeParser.yummyAnimeApi.search(cleanName)
-            val results: List<YummyAnimeResult> = yummyAnimeParser.parseSearchResults(yummySearchElement)
+            val yummySearchElement = parser.yummyAnimeApi.search(cleanName)
+            val results: List<YummyAnimeResult> = parser.parseSearchResults(yummySearchElement)
             val match = results.find { it.remote_ids?.shikimori_id == animeId } ?: results.firstOrNull()
             val poster = match?.poster
             val rawUrl = poster?.big ?: poster?.fullsize ?: poster?.medium

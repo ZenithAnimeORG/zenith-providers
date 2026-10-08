@@ -4,8 +4,11 @@ import com.pilldev.zenith.domain.repository.PlayerSettingsRepository
 import com.pilldev.zenith.providers.builtin.api.ktorfit.YummyKtorfitApi
 import com.pilldev.zenith.providers.builtin.api.ktorfit.createYummyKtorfitApi
 import com.pilldev.zenith.providers.builtin.net.BuiltInEndpoints
+import com.pilldev.zenith.providers.builtin.net.BuiltInSecrets
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
@@ -24,10 +27,25 @@ open class YummyAnimeApi(
     constructor(
         client: HttpClient,
         playerSettingsManager: PlayerSettingsRepository? = null,
+        getPublicToken: () -> String = { "" },
+        getPrivateToken: () -> String = { "" },
     ) : this(
         Ktorfit
             .Builder()
-            .httpClient(client)
+            .httpClient(
+                client.config {
+                    defaultRequest {
+                        val pub = getPublicToken().ifBlank { BuiltInSecrets.YUMMY_PUBLIC_TOKEN }
+                        val priv = getPrivateToken().ifBlank { BuiltInSecrets.YUMMY_PRIVATE_TOKEN }
+                        if (pub.isNotBlank()) {
+                            header("X-Application-Token", pub)
+                        }
+                        if (priv.isNotBlank()) {
+                            header("Authorization", "Bearer $priv")
+                        }
+                    }
+                }
+            )
             .baseUrl(BuiltInEndpoints.YUMMY_ANIME)
             .build()
             .createYummyKtorfitApi(),

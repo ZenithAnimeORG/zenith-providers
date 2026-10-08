@@ -27,7 +27,7 @@ open class YummyAnimeParser
          */
         public val yummyAnimeApi: YummyAnimeApi,
         private val json: Json,
-        private val playerSettingsManager: com.pilldev.zenith.domain.repository.PlayerSettingsRepository,
+        private val playerSettingsManager: com.pilldev.zenith.domain.repository.PlayerSettingsRepository? = null,
         private val appDispatchers: com.pilldev.zenith.domain.repository.AppDispatchers,
     ) : AnimeParser {
         override val name: String = "YummyAnime"
@@ -175,11 +175,11 @@ open class YummyAnimeParser
                                 }
 
                             val isKodik = playerName == "Kodik"
-                            val isKodikActive = playerSettingsManager.activeSources.value.contains("Kodik")
+                            val isKodikActive = playerSettingsManager?.activeSources?.value?.contains("Kodik") ?: true
                             val isYummyPlayerActive =
-                                playerSettingsManager.yummyAnimeInternalPlayers.value.contains(
+                                playerSettingsManager?.yummyAnimeInternalPlayers?.value?.contains(
                                     playerName,
-                                )
+                                ) ?: true
                             val shouldAdd = if (isKodik) isKodikActive else isYummyPlayerActive
                             if (shouldAdd) {
                                 val videoSource =

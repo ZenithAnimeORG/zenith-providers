@@ -1,6 +1,7 @@
 package com.pilldev.zenith.providers.builtin.provider
 
 import com.pilldev.zenith.domain.model.toProviderMirrorSpec
+import com.pilldev.zenith.domain.repository.AppDispatchers
 import com.pilldev.zenith.provider.BaseZenithProvider
 import com.pilldev.zenith.provider.MediaSourceProvider
 import com.pilldev.zenith.provider.context.ProviderContext
@@ -14,15 +15,22 @@ import com.pilldev.zenith.provider.model.ProviderSettingSpec
 import com.pilldev.zenith.provider.model.ProviderTestResult
 import com.pilldev.zenith.provider.model.ProviderVideoSource
 import com.pilldev.zenith.provider.model.measureTest
+import com.pilldev.zenith.providers.builtin.api.KodikApi
 import com.pilldev.zenith.providers.builtin.mapper.toProviderVideoSource
 import com.pilldev.zenith.providers.builtin.parser.KodikParser
 import com.pilldev.zenith.providers.builtin.resolver.KodikResolver
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.serialization.json.Json
 
 public open class KodikProvider(
-    private val kodikParser: KodikParser,
-    private val kodikResolver: KodikResolver? = null,
+    private var kodikParser: KodikParser? = null,
+    private var kodikResolver: KodikResolver? = null,
 ) : BaseZenithProvider(),
     MediaSourceProvider {
+
+    constructor() : this(null, null)
+
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.KODIK,
@@ -37,6 +45,7 @@ public open class KodikProvider(
                     ProviderSettingSpec(
                         key = "api_token",
                         label = "API Токен Kodik",
+                        type = com.pilldev.zenith.provider.model.SettingType.PASSWORD,
                         description = "Оставьте пустым для использования встроенного токена",
                     ),
                 ),
@@ -44,9 +53,45 @@ public open class KodikProvider(
                 .map { it.toProviderMirrorSpec() },
         )
 
+    private fun ensureParser(): KodikParser {
+        val existing = kodikParser
+        if (existing != null) return existing
+
+        val ctx = context
+        val client = ctx?.httpClient ?: HttpClient()
+        val customToken = ctx?.getSetting("api_token")?.trim().orEmpty()
+        val api = KodikApi(client)
+        val parser = KodikParser(
+            kodikApi = api,
+            json = Json { ignoreUnknownKeys = true; isLenient = true },
+            playerSettingsManager = null,
+            appDispatchers = object : AppDispatchers {
+                override val main = Dispatchers.Main
+                override val io = Dispatchers.IO
+                override val default = Dispatchers.Default
+                override val unconfined = Dispatchers.Unconfined
+            },
+            overrideToken = customToken.ifBlank { null },
+        )
+        kodikParser = parser
+        return parser
+    }
+
+    private fun ensureResolver(): KodikResolver {
+        val existing = kodikResolver
+        if (existing != null) return existing
+
+        val ctx = context
+        val client = ctx?.httpClient ?: HttpClient()
+        val resolver = KodikResolver(client, Json { ignoreUnknownKeys = true; isLenient = true })
+        kodikResolver = resolver
+        return resolver
+    }
+
     override suspend fun test(context: ProviderContext): ProviderTestResult =
         measureTest {
-            val result = kodikParser.getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
+            val parser = ensureParser()
+            val result = parser.getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
             "Kodik API активен. Найдено озвучек: ${result.sources.size}"
         }
 
@@ -56,36 +101,36 @@ public open class KodikProvider(
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = kodikParser.getSources(shikimoriId, animeName, russianName)
+            val parser = ensureParser()
+            val result = parser.getSources(shikimoriId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 
     override suspend fun resolveStream(
         episode: ProviderEpisode,
     ): ProviderResult<List<ProviderMediaStream>> {
-        if (kodikResolver != null) {
-            val stream = kodikResolver.resolve(episode.url)
-            if (stream != null) {
-                val list = stream.qualities
-                    .map { (q, u) ->
+        val resolver = ensureResolver()
+        val stream = resolver.resolve(episode.url)
+        if (stream != null) {
+            val list = stream.qualities
+                .map { (q, u) ->
+                    ProviderMediaStream(
+                        url = u,
+                        quality = q,
+                        headers = stream.headers,
+                        isHls = u.contains(".m3u8"),
+                    )
+                }.ifEmpty {
+                    listOf(
                         ProviderMediaStream(
-                            url = u,
-                            quality = q,
+                            url = stream.url,
+                            quality = stream.resolution,
                             headers = stream.headers,
-                            isHls = u.contains(".m3u8"),
-                        )
-                    }.ifEmpty {
-                        listOf(
-                            ProviderMediaStream(
-                                url = stream.url,
-                                quality = stream.resolution,
-                                headers = stream.headers,
-                                isHls = stream.url.contains(".m3u8"),
-                            ),
-                        )
-                    }
-                return ProviderResult.Success(list)
-            }
+                            isHls = stream.url.contains(".m3u8"),
+                        ),
+                    )
+                }
+            return ProviderResult.Success(list)
         }
         return super.resolveStream(episode)
     }

@@ -20,10 +20,11 @@ open class KodikParser
         private val json: Json,
         private val playerSettingsManager: com.pilldev.zenith.domain.repository.PlayerSettingsRepository? = null,
         private val appDispatchers: com.pilldev.zenith.domain.repository.AppDispatchers,
+        private val overrideToken: String? = null,
     ) : AnimeParser {
         override val name: String = "Kodik"
 
-        private val mainToken: String get() = playerSettingsManager?.effectiveKodikToken ?: BuiltInSecrets.KODIK_TOKEN
+        private val mainToken: String get() = overrideToken ?: playerSettingsManager?.effectiveKodikToken ?: BuiltInSecrets.KODIK_TOKEN
 
         private val fallbackTokens =
             listOf(

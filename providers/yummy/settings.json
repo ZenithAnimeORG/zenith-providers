@@ -1,3 +1,20 @@
 {
-  "items": []
+  "items": [
+    {
+      "type": "text",
+      "key": "public_token",
+      "title": "Public Token (X-Application-Token)",
+      "description": "Публичный токен YummyAnime API (оставьте пустым для встроенного)",
+      "defaultValue": "",
+      "isSecret": true
+    },
+    {
+      "type": "text",
+      "key": "private_token",
+      "title": "Private Token (Bearer)",
+      "description": "Приватный токен авторизации YummyAnime API (оставьте пустым для встроенного)",
+      "defaultValue": "",
+      "isSecret": true
+    }
+  ]
 }

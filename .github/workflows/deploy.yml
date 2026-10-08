@@ -31,6 +31,19 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Checkout SDK
+        uses: actions/checkout@v4
+        with:
+          repository: ZenithAnimeORG/zenith-provider-sdk
+          path: _sdk
+
+      - name: Build and Publish SDK to Maven Local
+        run: |
+          cd _sdk
+          chmod +x gradlew
+          ./gradlew publishToMavenLocal --no-daemon
+          cd ..
+
       - name: Assemble Packages & Generate Catalog
         run: |
           chmod +x gradlew

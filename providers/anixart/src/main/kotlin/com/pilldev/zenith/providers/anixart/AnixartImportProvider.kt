@@ -20,7 +20,7 @@ public open class AnixartImportProvider(
             if (data.isEmpty()) {
                 return ProviderResult.Success(ImportBatch(sourceName = manifest.name, entries = emptyList()))
             }
-            val text = data.decodeToString()
+            val text = decodeText(data).removePrefix("\uFEFF")
             val lines = text.lines()
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
@@ -29,18 +29,19 @@ public open class AnixartImportProvider(
                 return ProviderResult.Success(ImportBatch(sourceName = manifest.name, entries = emptyList()))
             }
 
-            val headerLine = lines.first()
-            val colMap = parseHeaders(headerLine)
+            val headerLine = lines.first().removePrefix("\uFEFF")
+            val delimiter = if (headerLine.count { it == ';' } > headerLine.count { it == ',' }) ';' else ','
+            val colMap = parseHeaders(headerLine, delimiter)
 
             val dataLines = lines.drop(1)
             val entries = mutableListOf<RawImportEntry>()
 
             for (line in dataLines) {
                 if (line.isBlank()) continue
-                val parts = parseCsvLine(line)
+                val parts = parseCsvLine(line, delimiter)
                 if (parts.size < 2) continue
 
-                val rusIdx = colMap["русское название"] ?: colMap["russian_name"] ?: colMap["russian"] ?: 1
+                val rusIdx = colMap["русское название"] ?: colMap["russian_name"] ?: colMap["russian"] ?: colMap["название"] ?: 1
                 val origIdx = colMap["оригинальное название"] ?: colMap["original_name"] ?: colMap["original"] ?: 2
                 val statusIdx = colMap["статус просмотра"] ?: colMap["status"] ?: (if (parts.size >= 6) 5 else parts.size - 1)
                 val ratingIdx = colMap["моя оценка"] ?: colMap["оценка"] ?: colMap["rating"] ?: colMap["score"] ?: 6
@@ -80,12 +81,25 @@ public open class AnixartImportProvider(
         }
     }
 
-    private fun parseHeaders(headerLine: String): Map<String, Int> =
-        parseCsvLine(headerLine)
+    private fun decodeText(data: ByteArray): String {
+        val utf8 = data.decodeToString()
+        return if (utf8.contains('\uFFFD')) {
+            try {
+                String(data, java.nio.charset.Charset.forName("windows-1251"))
+            } catch (_: Throwable) {
+                utf8
+            }
+        } else {
+            utf8
+        }
+    }
+
+    private fun parseHeaders(headerLine: String, delimiter: Char): Map<String, Int> =
+        parseCsvLine(headerLine, delimiter)
             .mapIndexed { index, name -> name.trim().removeSurrounding("\"").lowercase() to index }
             .toMap()
 
-    private fun parseCsvLine(line: String): List<String> {
+    private fun parseCsvLine(line: String, delimiter: Char = ','): List<String> {
         val result = mutableListOf<String>()
         val sb = StringBuilder()
         var inQuotes = false
@@ -94,7 +108,7 @@ public open class AnixartImportProvider(
             val c = line[i]
             if (c == '"') {
                 if (inQuotes) {
-                    if (i + 1 == line.length || line[i + 1] == ',') {
+                    if (i + 1 == line.length || line[i + 1] == delimiter) {
                         inQuotes = false
                     } else if (i + 1 < line.length && line[i + 1] == '"') {
                         sb.append('"')
@@ -109,7 +123,7 @@ public open class AnixartImportProvider(
                         sb.append('"')
                     }
                 }
-            } else if (c == ',' && !inQuotes) {
+            } else if (c == delimiter && !inQuotes) {
                 result.add(sb.toString().trim())
                 sb.setLength(0)
             } else {
@@ -121,20 +135,17 @@ public open class AnixartImportProvider(
         return result
     }
 
-    private fun mapStatus(statusStr: String): UserMediaStatus =
-        when {
-            statusStr.startsWith("Смотрю", ignoreCase = true) || statusStr.equals("watching", ignoreCase = true) ->
-                UserMediaStatus.WATCHING
-            statusStr.startsWith("В планах", ignoreCase = true) || statusStr.equals("planned", ignoreCase = true) ->
-                UserMediaStatus.PLANNED
-            statusStr.startsWith("Просмотрено", ignoreCase = true) || statusStr.equals("completed", ignoreCase = true) ->
-                UserMediaStatus.COMPLETED
-            statusStr.startsWith("Брошено", ignoreCase = true) || statusStr.equals("dropped", ignoreCase = true) ->
-                UserMediaStatus.DROPPED
-            statusStr.startsWith("Отложено", ignoreCase = true) || statusStr.equals("on_hold", ignoreCase = true) ->
-                UserMediaStatus.ON_HOLD
+    private fun mapStatus(statusStr: String): UserMediaStatus {
+        val s = statusStr.lowercase()
+        return when {
+            s.contains("просмотр") || s.contains("complet") -> UserMediaStatus.COMPLETED
+            s.contains("план") || s.contains("plan") -> UserMediaStatus.PLANNED
+            s.contains("смотр") || s.contains("watch") -> UserMediaStatus.WATCHING
+            s.contains("брош") || s.contains("drop") -> UserMediaStatus.DROPPED
+            s.contains("отлож") || s.contains("hold") -> UserMediaStatus.ON_HOLD
             else -> UserMediaStatus.WATCHING
         }
+    }
 
     private fun parseRating(ratingStr: String?): Int? {
         if (ratingStr.isNullOrBlank() || ratingStr.contains("Не оценено", ignoreCase = true)) return null

@@ -110,4 +110,47 @@ class AnixartImportProviderTest : ProviderContractTestBase() {
         assertEquals(UserMediaStatus.COMPLETED, batch.entries[1].targetStatus)
         assertEquals(8, batch.entries[1].rating)
     }
+
+    @Test
+    fun parseBackup_utf8WithBom_stripsBomAndParsesFirstHeader() = runTest {
+        val csv = "\uFEFF\"Русское название\",\"Оригинальное название\",\"Статус просмотра\"\n" +
+            "\"Хоримия\",\"Horimiya\",\"Просмотрено\""
+
+        val result = provider.parseBackup(csv.encodeToByteArray())
+        assertTrue(result is ProviderResult.Success)
+        val batch = result.data
+        assertEquals(1, batch.entries.size)
+        assertEquals("Хоримия", batch.entries[0].title)
+        assertEquals("Horimiya", batch.entries[0].originalTitle)
+        assertEquals(UserMediaStatus.COMPLETED, batch.entries[0].targetStatus)
+    }
+
+    @Test
+    fun parseBackup_semicolonDelimiter_parsesCorrectly() = runTest {
+        val csv = "id;russian_name;original_name;status;rating\n" +
+            "1;Врата Штейна;\"Steins;Gate\";completed;10"
+
+        val result = provider.parseBackup(csv.encodeToByteArray())
+        assertTrue(result is ProviderResult.Success)
+        val batch = result.data
+        assertEquals(1, batch.entries.size)
+        assertEquals("Врата Штейна", batch.entries[0].title)
+        assertEquals("Steins;Gate", batch.entries[0].originalTitle)
+        assertEquals(UserMediaStatus.COMPLETED, batch.entries[0].targetStatus)
+    }
+
+    @Test
+    fun parseBackup_windows1251Encoding_decodesCorrectly() = runTest {
+        val csv = "#,Русское название,Оригинальное название,Статус просмотра\n" +
+            "1,Атака титанов,Shingeki no Kyojin,Просмотрено"
+        val bytes = csv.toByteArray(java.nio.charset.Charset.forName("windows-1251"))
+
+        val result = provider.parseBackup(bytes)
+        assertTrue(result is ProviderResult.Success)
+        val batch = result.data
+        assertEquals(1, batch.entries.size)
+        assertEquals("Атака титанов", batch.entries[0].title)
+        assertEquals("Shingeki no Kyojin", batch.entries[0].originalTitle)
+        assertEquals(UserMediaStatus.COMPLETED, batch.entries[0].targetStatus)
+    }
 }

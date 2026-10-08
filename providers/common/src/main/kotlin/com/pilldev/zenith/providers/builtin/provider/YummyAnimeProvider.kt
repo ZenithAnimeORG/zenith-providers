@@ -105,13 +105,13 @@ public open class YummyAnimeProvider(
         }
 
     override suspend fun getSources(
-        shikimoriId: Int,
+        animeId: Int,
         animeName: String,
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
             val parser = ensureParser()
-            val result = parser.getSources(shikimoriId, animeName, russianName)
+            val result = parser.getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 

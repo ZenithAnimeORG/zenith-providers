@@ -61,12 +61,12 @@ public open class HdRezkaProvider(
         }
 
     override suspend fun getSources(
-        shikimoriId: Int,
+        animeId: Int,
         animeName: String,
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = hdRezkaParser.getSources(shikimoriId, animeName, russianName)
+            val result = hdRezkaParser.getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 

@@ -20,4 +20,6 @@ public object BuiltInProviders {
     public val OPENSUBTITLES: ProviderId = ProviderId("opensubtitles")
     public val ANIMEGO: ProviderId = ProviderId("animego")
     public val THEINTRODB: ProviderId = ProviderId("theintrodb")
+    public val SHIKIMORI: ProviderId = ProviderId("shikimori")
+    public val ANILIST: ProviderId = ProviderId("anilist")
 }

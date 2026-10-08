@@ -57,12 +57,12 @@ public open class LiftProvider(
         }
 
     override suspend fun getSources(
-        shikimoriId: Int,
+        animeId: Int,
         animeName: String,
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = liftParser.getSources(shikimoriId, animeName, russianName)
+            val result = liftParser.getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 

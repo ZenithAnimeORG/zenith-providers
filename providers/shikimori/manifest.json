@@ -1,0 +1,31 @@
+{
+  "id": "shikimori",
+  "name": "Shikimori",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Каталог аниме, описания, постеры и синхронизация списков Shikimori",
+  "author": "Zenith Community",
+  "homepage": "https://shikimori.one",
+  "icon": "icon.png",
+  "capabilities": [
+    "CATALOG",
+    "TRACKER",
+    "POSTER_SOURCE"
+  ],
+  "hosts": [
+    "shikimori.one",
+    "shikimori.me",
+    "shikimori.io"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.shikimori.ShikimoriProviderFactory",
+  "settings": "settings.json",
+  "pros": [
+    "Обширная база аниме с русскими названиями и описаниями",
+    "Синхронизация списков просмотра с аккаунтом Shikimori"
+  ],
+  "cons": []
+}

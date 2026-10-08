@@ -57,12 +57,12 @@ public open class AniLibertyProvider(
         }
 
     override suspend fun getSources(
-        shikimoriId: Int,
+        animeId: Int,
         animeName: String,
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = aniLibriaParser.getSources(shikimoriId, animeName, russianName)
+            val result = aniLibriaParser.getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 

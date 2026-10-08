@@ -1,0 +1,23 @@
+[
+  {
+    "key": "base_url",
+    "label": "Основной домен",
+    "type": "SELECT",
+    "description": "Зеркало сайта Shikimori для обхода блокировок",
+    "options": [
+      "https://shikimori.one",
+      "https://shikimori.me",
+      "https://shikimori.io"
+    ],
+    "defaultValue": "https://shikimori.one",
+    "required": true
+  },
+  {
+    "key": "access_token",
+    "label": "OAuth / Access Token",
+    "type": "PASSWORD",
+    "description": "Токен доступа Shikimori для отметки просмотренных серий и списков",
+    "defaultValue": "",
+    "required": false
+  }
+]

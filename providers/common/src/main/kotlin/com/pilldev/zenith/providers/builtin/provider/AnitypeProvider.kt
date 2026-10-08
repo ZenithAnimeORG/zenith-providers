@@ -48,12 +48,12 @@ public open class AnitypeProvider(
         }
 
     override suspend fun getSources(
-        shikimoriId: Int,
+        animeId: Int,
         animeName: String,
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = anitypeParser.getSources(shikimoriId, animeName, russianName)
+            val result = anitypeParser.getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 
@@ -61,11 +61,11 @@ public open class AnitypeProvider(
         malId: Int,
         episodeNumber: Int,
         episodeLength: Double?,
-        shikimoriId: Int,
+        animeId: Int,
         translationName: String?,
     ): ProviderResult<List<SkipInterval>> =
         ProviderResult.of {
-            val idToUse = if (shikimoriId > 0) shikimoriId else malId
+            val idToUse = if (animeId > 0) animeId else malId
             anitypeParser.getSkips(idToUse, episodeNumber, translationName)
         }
 }

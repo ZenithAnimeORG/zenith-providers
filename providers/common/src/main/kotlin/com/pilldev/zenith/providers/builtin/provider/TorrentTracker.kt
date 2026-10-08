@@ -76,7 +76,7 @@ public interface TorrentTracker : TorrentSourceProvider {
     override suspend fun search(
         query: String,
         russianName: String?,
-        shikimoriId: Int,
+        animeId: Int,
     ): ProviderResult<List<ProviderTorrentSource>> =
         try {
             ProviderResult.Success(search(query, russianName).map { it.toProviderTorrentSource() })

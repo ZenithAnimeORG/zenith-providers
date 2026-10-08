@@ -1,0 +1,10 @@
+[
+  {
+    "key": "access_token",
+    "label": "Personal Access Token",
+    "type": "PASSWORD",
+    "description": "Токен доступа AniList для синхронизации списков просмотра (получите на anilist.co/settings/developer)",
+    "defaultValue": "",
+    "required": false
+  }
+]

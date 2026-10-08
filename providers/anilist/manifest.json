@@ -1,0 +1,31 @@
+{
+  "id": "anilist",
+  "name": "AniList",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Международный каталог аниме, рейтинги, тренды и трекинг через AniList GraphQL",
+  "author": "Zenith Community",
+  "homepage": "https://anilist.co",
+  "icon": "icon.png",
+  "capabilities": [
+    "CATALOG",
+    "TRACKER"
+  ],
+  "hosts": [
+    "graphql.anilist.co",
+    "anilist.co"
+  ],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.anilist.AniListProviderFactory",
+  "settings": "settings.json",
+  "pros": [
+    "Крупнейшая международная база с актуальными трендами и датами выхода",
+    "Прямая поддержка MyAnimeList ID и синхронизация списков через GraphQL API"
+  ],
+  "cons": [
+    "Описания и метаданные преимущественно на английском языке"
+  ]
+}

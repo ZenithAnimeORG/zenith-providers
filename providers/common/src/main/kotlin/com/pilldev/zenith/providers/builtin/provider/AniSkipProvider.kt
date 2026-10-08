@@ -47,7 +47,7 @@ public open class AniSkipProvider(
         malId: Int,
         episodeNumber: Int,
         episodeLength: Double?,
-        shikimoriId: Int,
+        animeId: Int,
         translationName: String?,
     ): ProviderResult<List<SkipInterval>> =
         ProviderResult.of {

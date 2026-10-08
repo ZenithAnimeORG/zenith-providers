@@ -1,0 +1,25 @@
+{
+  "id": "anixart",
+  "name": "Anixart",
+  "version": "1.0.0",
+  "sdkVersion": "2.0",
+  "description": "Импорт закладок и списков из CSV экспорта Anixart",
+  "author": "Anixart",
+  "homepage": "https://anixart.tv",
+  "icon": "icon.png",
+  "capabilities": [
+    "IMPORT"
+  ],
+  "hosts": [],
+  "entry": {
+    "jvm": "provider.jar",
+    "android": "provider.dex"
+  },
+  "entryClass": "com.pilldev.zenith.providers.anixart.AnixartImportProviderFactory",
+  "settings": "settings.json",
+  "pros": [
+    "Быстрый перенос списков из Anixart",
+    "Поддержка стандартных CSV экспортов"
+  ],
+  "cons": []
+}

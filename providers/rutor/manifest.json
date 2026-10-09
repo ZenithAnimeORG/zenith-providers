@@ -8,7 +8,7 @@
   "homepage": "https://rutor.info",
   "icon": "icon.png",
   "capabilities": [
-    "TORRENT"
+    "TORRENT_SOURCE"
   ],
   "hosts": [
     "rutor.info",

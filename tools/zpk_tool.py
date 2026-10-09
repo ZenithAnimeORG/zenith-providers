@@ -158,6 +158,9 @@ def cmd_index(args):
 
     catalog = {
         "version": 1,
+        "name": getattr(args, "repo_name", None) or "Zenith Community Repository",
+        "description": getattr(args, "repo_desc", None) or "Официальный репозиторий плагинов сообщества Zenith",
+        "icon": getattr(args, "repo_icon", None) or (f"{base_url}/icon.png" if base_url else "icon.png"),
         "providers": entries
     }
 
@@ -263,6 +266,9 @@ def main():
     p_index.add_argument("--repo-dir", required=True, help="Directory containing .zpk files")
     p_index.add_argument("--output", required=True, help="Output index.json path")
     p_index.add_argument("--base-url", default="", help="Base URL prefix for downloadable artifacts")
+    p_index.add_argument("--repo-name", help="Human-readable name of the repository")
+    p_index.add_argument("--repo-desc", help="Description of the repository")
+    p_index.add_argument("--repo-icon", help="Icon URL for the repository")
 
     # verify
     p_verify = subparsers.add_parser("verify", help="Verify .zpk package")

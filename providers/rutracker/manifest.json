@@ -8,7 +8,7 @@
   "homepage": "https://rutracker.org",
   "icon": "icon.png",
   "capabilities": [
-    "TORRENT"
+    "TORRENT_SOURCE"
   ],
   "hosts": [
     "rutracker.org",

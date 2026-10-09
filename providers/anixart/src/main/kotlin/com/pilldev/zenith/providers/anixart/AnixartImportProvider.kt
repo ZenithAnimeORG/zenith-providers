@@ -1,6 +1,7 @@
 package com.pilldev.zenith.providers.anixart
 
 import com.pilldev.zenith.provider.ImportBatch
+import com.pilldev.zenith.provider.ImportInstructionStep
 import com.pilldev.zenith.provider.ImportProvider
 import com.pilldev.zenith.provider.RawImportEntry
 import com.pilldev.zenith.provider.model.PluginManifest
@@ -14,6 +15,25 @@ public open class AnixartImportProvider(
 ) : ImportProvider {
 
     override val supportedExtensions: List<String> = listOf("csv")
+
+    override val instructions: List<ImportInstructionStep> = listOf(
+        ImportInstructionStep(
+            stepNumber = 1,
+            title = "Откройте приложение Anixart",
+            description = "Перейдите на вкладку «Профиль» и нажмите на иконку настроек в правом верхнем углу.",
+        ),
+        ImportInstructionStep(
+            stepNumber = 2,
+            title = "Экспортируйте списки",
+            description = "Перейдите в раздел «Резервное копирование» и выберите «Экспорт списков в CSV».",
+            note = "Убедитесь, что выбраны все нужные категории (Смотрю, В планах, Просмотрено и др.).",
+        ),
+        ImportInstructionStep(
+            stepNumber = 3,
+            title = "Загрузите файл для импорта",
+            description = "Нажмите «Выбрать файл» ниже и укажите сохраненный CSV-файл для начала сопоставления.",
+        ),
+    )
 
     override suspend fun parseBackup(data: ByteArray): ProviderResult<ImportBatch> {
         return try {

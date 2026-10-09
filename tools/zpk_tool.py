@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import sys
 import zipfile
 from pathlib import Path
@@ -118,8 +119,22 @@ def cmd_index(args):
     if not repo_dir.exists():
         repo_dir.mkdir(parents=True, exist_ok=True)
 
+    icons_dir = repo_dir / "icons"
+    icons_dir.mkdir(parents=True, exist_ok=True)
+
     base_url = args.base_url.rstrip("/") if args.base_url else ""
     zpk_files = sorted(repo_dir.glob("*.zpk"))
+
+    # Copy repo icon if present in project root or current dir
+    repo_icon_candidates = [
+        Path("icon.png"),
+        repo_dir / "icon.png",
+        repo_dir.parent.parent / "icon.png",
+    ]
+    for candidate in repo_icon_candidates:
+        if candidate.exists() and candidate != (repo_dir / "icon.png"):
+            shutil.copy2(candidate, repo_dir / "icon.png")
+            break
 
     entries = []
     for zpk_path in zpk_files:
@@ -129,6 +144,14 @@ def cmd_index(args):
                     print(f"Warning: Skipping {zpk_path.name} (missing manifest.json)")
                     continue
                 manifest_data = json.loads(zf.read("manifest.json").decode("utf-8"))
+
+                icon_name = manifest_data.get("icon") or "icon.png"
+                provider_id = manifest_data.get("id")
+                entry_icon_url = None
+                if icon_name in zf.namelist() and provider_id:
+                    icon_target = icons_dir / f"{provider_id}.png"
+                    icon_target.write_bytes(zf.read(icon_name))
+                    entry_icon_url = f"{base_url}/icons/{provider_id}.png" if base_url else f"icons/{provider_id}.png"
         except Exception as e:
             print(f"Warning: Failed to read {zpk_path.name}: {e}")
             continue
@@ -150,7 +173,7 @@ def cmd_index(args):
             "entryClass": manifest_data.get("entryClass", ""),
             "androidArtifact": artifact,
             "desktopArtifact": artifact,
-            "icon": manifest_data.get("icon"),
+            "icon": entry_icon_url or manifest_data.get("icon"),
             "homepage": manifest_data.get("homepage"),
             "description": manifest_data.get("description", "")
         }

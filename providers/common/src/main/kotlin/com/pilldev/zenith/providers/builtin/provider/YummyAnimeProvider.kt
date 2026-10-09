@@ -130,3 +130,8 @@ public open class YummyAnimeProvider(
             rawUrl?.let { UrlNormalizer.resolve(it) }
         }
 }
+
+public class YummyAnimeProviderFactory : com.pilldev.zenith.provider.ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): com.pilldev.zenith.provider.ZenithProvider =
+        YummyAnimeProvider()
+}

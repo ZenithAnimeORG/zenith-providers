@@ -14,9 +14,22 @@ import com.pilldev.zenith.provider.model.measureTest
 import com.pilldev.zenith.providers.builtin.api.AniSkipApi
 
 public open class AniSkipProvider(
-    private val aniSkipApi: AniSkipApi,
+    private var aniSkipApi: AniSkipApi? = null,
 ) : BaseZenithProvider(),
     SkipTimingsProvider {
+
+    constructor() : this(null)
+
+    private fun ensureApi(): AniSkipApi {
+        val existing = aniSkipApi
+        if (existing != null) return existing
+        val ctx = context
+        val client = ctx?.httpClient ?: io.ktor.client.HttpClient()
+        val api = AniSkipApi(client)
+        aniSkipApi = api
+        return api
+    }
+
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.ANISKIP,
@@ -39,7 +52,7 @@ public open class AniSkipProvider(
 
     override suspend fun test(context: ProviderContext): ProviderTestResult =
         measureTest {
-            val response = aniSkipApi.getSkipTimes(54856, 1, 1420.0)
+            val response = ensureApi().getSkipTimes(54856, 1, 1420.0)
             "AniSkip API активен (найдено интервалов: ${response.results.size})"
         }
 
@@ -51,7 +64,7 @@ public open class AniSkipProvider(
         translationName: String?,
     ): ProviderResult<List<SkipInterval>> =
         ProviderResult.of {
-            val response = aniSkipApi.getSkipTimes(malId, episodeNumber, episodeLength)
+            val response = ensureApi().getSkipTimes(malId, episodeNumber, episodeLength)
             response.results.mapNotNull { result ->
                 val interval = result.interval
                 val start = result.start
@@ -75,4 +88,9 @@ public open class AniSkipProvider(
                 }
             }
         }
+}
+
+public class AniSkipProviderFactory : com.pilldev.zenith.provider.ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): com.pilldev.zenith.provider.ZenithProvider =
+        AniSkipProvider()
 }

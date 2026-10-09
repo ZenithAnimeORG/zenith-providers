@@ -2,6 +2,8 @@ package com.pilldev.zenith.providers.builtin.provider
 
 import com.pilldev.zenith.provider.BaseZenithProvider
 import com.pilldev.zenith.provider.SubtitleSourceProvider
+import com.pilldev.zenith.provider.ZenithProvider
+import com.pilldev.zenith.provider.ZenithProviderFactory
 import com.pilldev.zenith.provider.context.ProviderContext
 import com.pilldev.zenith.provider.model.BuiltInProviders
 import com.pilldev.zenith.provider.model.ProviderCapability
@@ -13,11 +15,30 @@ import com.pilldev.zenith.provider.model.ProviderTestResult
 import com.pilldev.zenith.provider.model.measureTest
 import com.pilldev.zenith.providers.builtin.mapper.toProviderSubtitle
 import com.pilldev.zenith.providers.builtin.subtitles.OpenSubtitlesManager
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 public open class OpenSubtitlesProvider(
-    private val openSubtitlesManager: OpenSubtitlesManager,
+    private var openSubtitlesManager: OpenSubtitlesManager? = null,
 ) : BaseZenithProvider(),
     SubtitleSourceProvider {
+    public constructor() : this(null)
+
+    private fun ensureManager() {
+        if (openSubtitlesManager == null) {
+            openSubtitlesManager = OpenSubtitlesManager(
+                HttpClient(),
+                object : com.pilldev.zenith.domain.repository.AppDispatchers {
+                    override val main: CoroutineDispatcher = Dispatchers.Main
+                    override val io: CoroutineDispatcher = Dispatchers.IO
+                    override val default: CoroutineDispatcher = Dispatchers.Default
+                    override val unconfined: CoroutineDispatcher = Dispatchers.Unconfined
+                },
+            )
+        }
+    }
+
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.OPENSUBTITLES,
@@ -39,7 +60,8 @@ public open class OpenSubtitlesProvider(
 
     override suspend fun test(context: ProviderContext): ProviderTestResult =
         measureTest {
-            val result = openSubtitlesManager.searchSubtitles("Horimiya", "rus", 1, 1)
+            ensureManager()
+            val result = (openSubtitlesManager ?: error("OpenSubtitlesManager not initialized")).searchSubtitles("Horimiya", "rus", 1, 1)
             "OpenSubtitles API активен. Найдено субтитров: ${result.size}"
         }
 
@@ -50,12 +72,18 @@ public open class OpenSubtitlesProvider(
         seasonNumber: Int?,
     ): ProviderResult<List<ProviderSubtitle>> =
         ProviderResult.of {
-            val subs = openSubtitlesManager.searchSubtitles(query, languages, episodeNumber, seasonNumber)
+            ensureManager()
+            val subs = (openSubtitlesManager ?: error("OpenSubtitlesManager not initialized")).searchSubtitles(query, languages, episodeNumber, seasonNumber)
             subs.map { it.toProviderSubtitle() }
         }
 
     override suspend fun getDownloadLink(fileId: Long): ProviderResult<String?> =
         ProviderResult.of {
-            openSubtitlesManager.getDownloadLink(fileId)
+            ensureManager()
+            (openSubtitlesManager ?: error("OpenSubtitlesManager not initialized")).getDownloadLink(fileId)
         }
+}
+
+public class OpenSubtitlesProviderFactory : ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): ZenithProvider = OpenSubtitlesProvider()
 }

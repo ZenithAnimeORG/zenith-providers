@@ -18,7 +18,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.NyaaTracker",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.NyaaTrackerFactory",
   "settings": "settings.json",
   "pros": [
     "Максимальное качество BDRip и Remux",

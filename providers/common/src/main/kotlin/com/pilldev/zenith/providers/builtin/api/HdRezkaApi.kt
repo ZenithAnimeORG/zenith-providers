@@ -12,8 +12,9 @@ import io.ktor.http.encodeURLParameter
 open class HdRezkaApi
     constructor(
         open val ktorfitApi: HdRezkaKtorfitApi,
-        private val playerSettingsManager: PlayerSettingsRepository,
+        private val playerSettingsManager: PlayerSettingsRepository? = null,
         private val client: HttpClient = HttpClient(),
+        private val providerContext: com.pilldev.zenith.provider.context.ProviderContext? = null,
     ) {
         constructor(
             client: HttpClient,
@@ -27,18 +28,40 @@ open class HdRezkaApi
                 .createHdRezkaKtorfitApi(),
             playerSettingsManager,
             client,
+            null,
+        )
+
+        constructor(
+            client: HttpClient,
+            providerContext: com.pilldev.zenith.provider.context.ProviderContext? = null,
+        ) : this(
+            Ktorfit
+                .Builder()
+                .httpClient(client)
+                .baseUrl("https://hdrezka.me/")
+                .build()
+                .createHdRezkaKtorfitApi(),
+            null,
+            client,
+            providerContext,
         )
 
         private val baseUrl: String
-            get() = "https://" + playerSettingsManager.hdRezkaBaseUrl.value
-                .ifBlank { "hdrezka.me" }
-                .removePrefix("https://")
-                .removePrefix("http://")
-                .trimEnd('/')
+            get() {
+                val fromCtx = providerContext?.getSetting("mirror")?.trim()
+                val fromSettings = playerSettingsManager?.hdRezkaBaseUrl?.value?.trim()
+                val m = fromCtx?.takeIf { it.isNotBlank() } ?: fromSettings?.takeIf { it.isNotBlank() } ?: "hdrezka.me"
+                return "https://" + m
+                    .removePrefix("https://")
+                    .removePrefix("http://")
+                    .trimEnd('/')
+            }
 
         private fun handleWorkingMirror(mirrorUrl: String) {
-            if (mirrorUrl != baseUrl && playerSettingsManager.hdRezkaAutoMirror.value) {
-                playerSettingsManager.setHdRezkaBaseUrl(mirrorUrl.removePrefix("https://"))
+            val clean = mirrorUrl.removePrefix("https://").removePrefix("http://").trimEnd('/')
+            providerContext?.setSetting("mirror", clean)
+            if (mirrorUrl != baseUrl && playerSettingsManager?.hdRezkaAutoMirror?.value == true) {
+                playerSettingsManager.setHdRezkaBaseUrl(clean)
             }
         }
 
@@ -46,12 +69,13 @@ open class HdRezkaApi
             val mirrors = mutableListOf<String>()
             val current = baseUrl
             mirrors.add(current)
-            val ranked = playerSettingsManager.hdRezkaRankedMirrors.value
+            val ranked = playerSettingsManager?.hdRezkaRankedMirrors?.value ?: emptyList()
             ranked.forEach { m ->
                 val clean = "https://" + m.removePrefix("https://").removePrefix("http://").trimEnd('/')
                 if (!mirrors.contains(clean)) mirrors.add(clean)
             }
-            val hasLogin = playerSettingsManager.hdRezkaLogin.value.isNotBlank()
+            val hasLogin = (providerContext?.getSetting("login")?.isNotBlank() == true) ||
+                (playerSettingsManager?.hdRezkaLogin?.value?.isNotBlank() == true)
             // Account presence is an enhancement, not a replacement:
             // Try AUTH mirrors first, followed immediately by NO_AUTH mirrors as fallback!
             val primary = if (hasLogin) {
@@ -253,10 +277,12 @@ open class HdRezkaApi
             val isSuccess = eval.profile?.authStatus == com.pilldev.zenith.domain.model.MirrorAuthStatus.AUTHORIZED || eval.isWorking
             if (isSuccess) {
                 val cookies = eval.profile?.authCookies ?: ""
-                playerSettingsManager.setHdRezkaMirrorCookies(clean, if (cookies.isNotBlank()) cookies else "dle_user_id=1")
+                providerContext?.setSetting("cookies_$clean", if (cookies.isNotBlank()) cookies else "dle_user_id=1")
+                playerSettingsManager?.setHdRezkaMirrorCookies(clean, if (cookies.isNotBlank()) cookies else "dle_user_id=1")
                 return true
             } else {
-                playerSettingsManager.setHdRezkaMirrorCookies(clean, "FAILED")
+                providerContext?.setSetting("cookies_$clean", "FAILED")
+                playerSettingsManager?.setHdRezkaMirrorCookies(clean, "FAILED")
                 return false
             }
         }

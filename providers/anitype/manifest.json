@@ -19,7 +19,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnitypeProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnitypeProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Чистый API",

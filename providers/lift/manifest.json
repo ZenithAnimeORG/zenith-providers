@@ -19,7 +19,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.LiftProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.LiftProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Отличное качество субтитров",

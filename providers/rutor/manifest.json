@@ -18,7 +18,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.RuTorTracker",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.RuTorTrackerFactory",
   "settings": "settings.json",
   "pros": [
     "Русские озвучки",

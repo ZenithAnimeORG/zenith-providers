@@ -29,7 +29,7 @@ open class AnitypeParser
     constructor(
         private val client: HttpClient,
         private val json: Json,
-        private val playerSettingsManager: PlayerSettingsRepository,
+        private val playerSettingsManager: PlayerSettingsRepository? = null,
         private val appDispatchers: com.pilldev.zenith.domain.repository.AppDispatchers,
     ) : AnimeParser {
         override val name: String = "AniType"

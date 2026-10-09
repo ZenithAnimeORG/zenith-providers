@@ -17,7 +17,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.TheIntroDbProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.TheIntroDbProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Открытая база таймингов"

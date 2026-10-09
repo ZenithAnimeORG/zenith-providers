@@ -18,7 +18,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnimeGoProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnimeGoProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Удобный каталог",

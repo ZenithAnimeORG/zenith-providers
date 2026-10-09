@@ -135,3 +135,8 @@ public open class KodikProvider(
         return super.resolveStream(episode)
     }
 }
+
+public class KodikProviderFactory : com.pilldev.zenith.provider.ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): com.pilldev.zenith.provider.ZenithProvider =
+        KodikProvider()
+}

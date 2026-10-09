@@ -4,6 +4,8 @@ import com.pilldev.zenith.domain.model.TorrentTitleParser
 import com.pilldev.zenith.domain.model.TranslationType
 import com.pilldev.zenith.domain.model.toProviderMirrorSpec
 import com.pilldev.zenith.provider.BaseZenithProvider
+import com.pilldev.zenith.provider.ZenithProvider
+import com.pilldev.zenith.provider.ZenithProviderFactory
 import com.pilldev.zenith.provider.context.ProviderContext
 import com.pilldev.zenith.provider.matcher.AnimeTitleMatcher
 import com.pilldev.zenith.provider.model.ProviderCapability
@@ -18,10 +20,10 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.encodeURLParameter
 
-class RuTorTracker
+open class RuTorTracker
     constructor(
-        private val settings: com.pilldev.zenith.domain.repository.PlayerSettingsRepository,
-        private val client: HttpClient,
+        private val settings: com.pilldev.zenith.domain.repository.PlayerSettingsRepository? = null,
+        private val client: HttpClient = HttpClient(),
         override val name: String = "RuTor",
     ) : BaseZenithProvider(),
         TorrentTracker {
@@ -49,7 +51,7 @@ class RuTorTracker
 
         override suspend fun test(context: ProviderContext): ProviderTestResult =
             measureTest {
-                val mirror = effectiveMirror().ifBlank { context.getSetting("mirror") ?: settings.ruTorBaseUrl.value }
+                val mirror = effectiveMirror().ifBlank { context.getSetting("mirror") ?: settings?.ruTorBaseUrl?.value ?: "https://free-rutor.org" }
                 val baseUrl = mirror.removeSuffix("/")
                 val response: HttpResponse = client.get("$baseUrl/index.php")
                 if (response.status.value in 200..399) {
@@ -65,7 +67,7 @@ class RuTorTracker
         ): List<TorrentResult> {
             val results = mutableListOf<TorrentResult>()
             try {
-                val mirror = effectiveMirror().ifBlank { getSetting("mirror") ?: settings.ruTorBaseUrl.value }
+                val mirror = effectiveMirror().ifBlank { getSetting("mirror") ?: settings?.ruTorBaseUrl?.value ?: "https://free-rutor.org" }
                 val baseUrl = mirror.removeSuffix("/")
                 val queries = mutableListOf<String>()
                 russianName?.let {
@@ -144,3 +146,7 @@ class RuTorTracker
             return results
         }
     }
+
+public class RuTorTrackerFactory : ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): ZenithProvider = RuTorTracker()
+}

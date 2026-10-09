@@ -9,6 +9,8 @@ import com.pilldev.zenith.domain.model.TranslationType
 import com.pilldev.zenith.domain.model.toProviderMirrorSpec
 import com.pilldev.zenith.domain.repository.PlayerSettingsRepository
 import com.pilldev.zenith.provider.BaseZenithProvider
+import com.pilldev.zenith.provider.ZenithProvider
+import com.pilldev.zenith.provider.ZenithProviderFactory
 import com.pilldev.zenith.provider.context.ProviderContext
 import com.pilldev.zenith.provider.model.ProviderCapability
 import com.pilldev.zenith.provider.model.ProviderId
@@ -23,10 +25,10 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.encodeURLQueryComponent
 
-class RuTrackerTracker
+open class RuTrackerTracker
     constructor(
-        private val settings: PlayerSettingsRepository,
-        private val client: HttpClient,
+        private val settings: PlayerSettingsRepository? = null,
+        private val client: HttpClient = HttpClient(),
         override val name: String = "RuTracker",
     ) : BaseZenithProvider(),
         TorrentTracker {
@@ -134,3 +136,7 @@ class RuTrackerTracker
             return results
         }
     }
+
+public class RuTrackerTrackerFactory : ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): ZenithProvider = RuTrackerTracker()
+}

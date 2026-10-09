@@ -17,7 +17,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnimeSkipProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AnimeSkipProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Детальные сегменты эпизодов"

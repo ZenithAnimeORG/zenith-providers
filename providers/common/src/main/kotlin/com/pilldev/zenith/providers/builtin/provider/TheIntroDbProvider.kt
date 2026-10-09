@@ -2,6 +2,8 @@ package com.pilldev.zenith.providers.builtin.provider
 
 import com.pilldev.zenith.provider.BaseZenithProvider
 import com.pilldev.zenith.provider.SkipTimingsProvider
+import com.pilldev.zenith.provider.ZenithProvider
+import com.pilldev.zenith.provider.ZenithProviderFactory
 import com.pilldev.zenith.provider.context.ProviderContext
 import com.pilldev.zenith.provider.model.BuiltInProviders
 import com.pilldev.zenith.provider.model.ProviderCapability
@@ -51,4 +53,8 @@ public open class TheIntroDbProvider(
         ProviderResult.of {
             emptyList()
         }
+}
+
+public class TheIntroDbProviderFactory : ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): ZenithProvider = TheIntroDbProvider()
 }

@@ -18,15 +18,29 @@ import com.pilldev.zenith.provider.model.ProviderTestResult
 import com.pilldev.zenith.provider.model.ProviderVideoSource
 import com.pilldev.zenith.provider.model.measureTest
 import com.pilldev.zenith.provider.net.UrlNormalizer
+import com.pilldev.zenith.providers.builtin.api.HdRezkaApi
 import com.pilldev.zenith.providers.builtin.mapper.toProviderVideoSource
 import com.pilldev.zenith.providers.builtin.parser.HdRezkaDecoder
 import com.pilldev.zenith.providers.builtin.parser.HdRezkaParser
 
 public open class HdRezkaProvider(
-    private val hdRezkaParser: HdRezkaParser,
+    private var hdRezkaParser: HdRezkaParser? = null,
 ) : BaseZenithProvider(),
     MediaSourceProvider,
     PosterSourceProvider {
+
+    constructor() : this(null)
+
+    private fun ensureParser(): HdRezkaParser {
+        val existing = hdRezkaParser
+        if (existing != null) return existing
+        val ctx = context
+        val client = ctx?.httpClient ?: io.ktor.client.HttpClient()
+        val api = HdRezkaApi(client, ctx)
+        val parser = HdRezkaParser(api)
+        hdRezkaParser = parser
+        return parser
+    }
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.HDREZKA,
@@ -52,7 +66,7 @@ public open class HdRezkaProvider(
     override suspend fun test(context: ProviderContext): ProviderTestResult =
         measureTest {
             val mirror = effectiveMirror().ifBlank { context.getSetting("mirror") ?: "hdrezka.me" }
-            val html = hdRezkaParser.hdRezkaApi.search("Horimiya")
+            val html = ensureParser().hdRezkaApi.search("Horimiya")
             if (html.isNotBlank()) {
                 "Зеркало $mirror отвечает нормально"
             } else {
@@ -66,7 +80,7 @@ public open class HdRezkaProvider(
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = hdRezkaParser.getSources(animeId, animeName, russianName)
+            val result = ensureParser().getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 
@@ -76,7 +90,7 @@ public open class HdRezkaProvider(
     ): ProviderResult<String?> =
         ProviderResult.of {
             val cleanName = AnimeTitleMatcher.cleanForSearch(animeName)
-            val html = hdRezkaParser.hdRezkaApi.search(cleanName)
+            val html = ensureParser().hdRezkaApi.search(cleanName)
             val doc = Ksoup.parse(html)
             val img = doc.select(".b-content__inline_item img").firstOrNull()
                 ?: doc.select(".b-sidecover img").firstOrNull()
@@ -88,7 +102,7 @@ public open class HdRezkaProvider(
         episode: ProviderEpisode,
     ): ProviderResult<List<ProviderMediaStream>> =
         ProviderResult.of {
-            val stream = hdRezkaParser.resolve(episode.url) ?: error("HDRezka resolve failed")
+            val stream = ensureParser().resolve(episode.url) ?: error("HDRezka resolve failed")
             if (stream.qualities.isNotEmpty()) {
                 stream.qualities
                     .filter { !HdRezkaDecoder.isPremiumQuality(it.key) }
@@ -109,4 +123,9 @@ public open class HdRezkaProvider(
                 )
             }
         }
+}
+
+public class HdRezkaProviderFactory : com.pilldev.zenith.provider.ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): com.pilldev.zenith.provider.ZenithProvider =
+        HdRezkaProvider()
 }

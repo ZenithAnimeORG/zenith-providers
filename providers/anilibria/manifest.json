@@ -20,7 +20,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AniLibertyProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.AniLibertyProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Высокое качество озвучки",

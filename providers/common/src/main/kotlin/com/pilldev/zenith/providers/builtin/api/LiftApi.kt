@@ -2,6 +2,7 @@ package com.pilldev.zenith.providers.builtin.api
 
 import co.touchlab.kermit.Logger
 import com.pilldev.zenith.domain.repository.PlayerSettingsRepository
+import com.pilldev.zenith.provider.context.ProviderContext
 import com.pilldev.zenith.providers.builtin.api.ktorfit.LiftKtorfitApi
 import com.pilldev.zenith.providers.builtin.api.ktorfit.LiftPlaylistResponseDto
 import com.pilldev.zenith.providers.builtin.api.ktorfit.LiftSearchResponseDto
@@ -16,8 +17,9 @@ import io.ktor.client.request.header
 open class LiftApi
     constructor(
         open val ktorfitApi: LiftKtorfitApi,
-        private val playerSettingsManager: PlayerSettingsRepository,
+        private val playerSettingsManager: PlayerSettingsRepository? = null,
         private val client: HttpClient = HttpClient(),
+        private val providerContext: ProviderContext? = null,
     ) {
         private val logger = Logger.withTag("LiftApi")
 
@@ -28,6 +30,26 @@ open class LiftApi
                 }
             }
         }
+
+        constructor(
+            client: HttpClient = HttpClient(),
+            providerContext: ProviderContext? = null,
+        ) : this(
+            Ktorfit
+                .Builder()
+                .httpClient(
+                    client.config {
+                        defaultRequest {
+                            header("Authorization", LiftMirrorSelector.BASIC_AUTH_HEADER)
+                        }
+                    },
+                ).baseUrl(BuiltInEndpoints.LIFT)
+                .build()
+                .createLiftKtorfitApi(),
+            null,
+            client,
+            providerContext,
+        )
 
         constructor(
             client: HttpClient,
@@ -46,6 +68,7 @@ open class LiftApi
                 .createLiftKtorfitApi(),
             playerSettingsManager,
             client,
+            null,
         )
 
         private fun getApiForMirror(mirrorUrl: String): LiftKtorfitApi {
@@ -61,11 +84,17 @@ open class LiftApi
                 .createLiftKtorfitApi()
         }
 
-        private fun getCandidateMirrors(): List<String> {
-            val custom = playerSettingsManager.liftBaseUrl.value
-            val ranked = playerSettingsManager.liftRankedMirrors.value
+        private suspend fun getCandidateMirrors(): List<String> {
             val candidates = mutableListOf<String>()
-            if (custom.isNotBlank()) candidates.add(LiftMirrorSelector.normalizeMirrorUrl(custom))
+            providerContext?.getEffectiveMirror()?.takeIf { it.isNotBlank() }?.let {
+                candidates.add(LiftMirrorSelector.normalizeMirrorUrl(it))
+            }
+            providerContext?.getSetting("base_url")?.takeIf { it.isNotBlank() }?.let {
+                candidates.add(LiftMirrorSelector.normalizeMirrorUrl(it))
+            }
+            val custom = playerSettingsManager?.liftBaseUrl?.value
+            val ranked = playerSettingsManager?.liftRankedMirrors?.value ?: emptyList()
+            if (!custom.isNullOrBlank()) candidates.add(LiftMirrorSelector.normalizeMirrorUrl(custom))
             ranked.filter { it.isNotBlank() }.forEach { candidates.add(LiftMirrorSelector.normalizeMirrorUrl(it)) }
             LiftMirrorSelector.candidateMirrors.forEach { candidates.add(it) }
             return candidates.distinct()

@@ -19,10 +19,30 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 public open class AnimeSkipProvider(
-    private val animeSkipApi: AnimeSkipApi,
-    private val httpClient: io.ktor.client.HttpClient = io.ktor.client.HttpClient(),
+    private var animeSkipApi: AnimeSkipApi? = null,
+    private var httpClient: io.ktor.client.HttpClient? = null,
 ) : BaseZenithProvider(),
     SkipTimingsProvider {
+
+    constructor() : this(null, null)
+
+    private fun ensureApi(): AnimeSkipApi {
+        val existing = animeSkipApi
+        if (existing != null) return existing
+        val client = ensureClient()
+        val api = AnimeSkipApi(client)
+        animeSkipApi = api
+        return api
+    }
+
+    private fun ensureClient(): io.ktor.client.HttpClient {
+        val existing = httpClient
+        if (existing != null) return existing
+        val client = context?.httpClient ?: io.ktor.client.HttpClient()
+        httpClient = client
+        return client
+    }
+
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.ANIMESKIP,
@@ -57,7 +77,7 @@ public open class AnimeSkipProvider(
     ): ProviderResult<List<SkipInterval>> =
         ProviderResult.of {
             val aniListId = runCatching {
-                val text = httpClient.get("https://api.ani.zip/mappings?mal_id=$malId").bodyAsText()
+                val text = ensureClient().get("https://api.ani.zip/mappings?mal_id=$malId").bodyAsText()
                 val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                 val obj = json.decodeFromString<kotlinx.serialization.json.JsonObject>(text)
                 obj["mappings"]
@@ -69,7 +89,7 @@ public open class AnimeSkipProvider(
             if (aniListId == null) {
                 emptyList()
             } else {
-                val response = animeSkipApi.getTimestamps(aniListId)
+                val response = ensureApi().getTimestamps(aniListId)
                 val episodes =
                     response.data?.findShowsByExternalId?.flatMap { it.episodes ?: emptyList() } ?: emptyList()
                 val episode = episodes.find { it.number == episodeNumber.toString() }
@@ -110,4 +130,9 @@ public open class AnimeSkipProvider(
             "mixed-ed" -> "mixed-ed"
             else -> null
         }
+}
+
+public class AnimeSkipProviderFactory : com.pilldev.zenith.provider.ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): com.pilldev.zenith.provider.ZenithProvider =
+        AnimeSkipProvider()
 }

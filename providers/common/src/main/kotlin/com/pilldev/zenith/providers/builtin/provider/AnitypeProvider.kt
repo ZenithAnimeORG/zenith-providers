@@ -17,10 +17,34 @@ import com.pilldev.zenith.providers.builtin.mapper.toProviderVideoSource
 import com.pilldev.zenith.providers.builtin.parser.AnitypeParser
 
 public open class AnitypeProvider(
-    private val anitypeParser: AnitypeParser,
+    private var anitypeParser: AnitypeParser? = null,
 ) : BaseZenithProvider(),
     MediaSourceProvider,
     SkipTimingsProvider {
+
+    constructor() : this(null)
+
+    private fun ensureParser(): AnitypeParser {
+        val existing = anitypeParser
+        if (existing != null) return existing
+        val ctx = context
+        val client = ctx?.httpClient ?: io.ktor.client.HttpClient()
+        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; isLenient = true }
+        val parser = AnitypeParser(
+            client = client,
+            json = json,
+            playerSettingsManager = null,
+            appDispatchers = object : com.pilldev.zenith.domain.repository.AppDispatchers {
+                override val main = kotlinx.coroutines.Dispatchers.Main
+                override val io = kotlinx.coroutines.Dispatchers.IO
+                override val default = kotlinx.coroutines.Dispatchers.Default
+                override val unconfined = kotlinx.coroutines.Dispatchers.Unconfined
+            },
+        )
+        anitypeParser = parser
+        return parser
+    }
+
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.ANITYPE,
@@ -43,7 +67,7 @@ public open class AnitypeProvider(
 
     override suspend fun test(context: ProviderContext): ProviderTestResult =
         measureTest {
-            val result = anitypeParser.getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
+            val result = ensureParser().getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
             "AniType API активен. Найдено озвучек: ${result.sources.size}"
         }
 
@@ -53,7 +77,7 @@ public open class AnitypeProvider(
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = anitypeParser.getSources(animeId, animeName, russianName)
+            val result = ensureParser().getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 
@@ -66,6 +90,11 @@ public open class AnitypeProvider(
     ): ProviderResult<List<SkipInterval>> =
         ProviderResult.of {
             val idToUse = if (animeId > 0) animeId else malId
-            anitypeParser.getSkips(idToUse, episodeNumber, translationName)
+            ensureParser().getSkips(idToUse, episodeNumber, translationName)
         }
+}
+
+public class AnitypeProviderFactory : com.pilldev.zenith.provider.ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): com.pilldev.zenith.provider.ZenithProvider =
+        AnitypeProvider()
 }

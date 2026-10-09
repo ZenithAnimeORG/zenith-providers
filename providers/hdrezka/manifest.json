@@ -20,7 +20,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.HdRezkaProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.HdRezkaProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Высокое качество до 1080p Ultra",

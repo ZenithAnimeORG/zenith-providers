@@ -20,9 +20,34 @@ import com.pilldev.zenith.providers.builtin.mapper.toProviderVideoSource
 import com.pilldev.zenith.providers.builtin.parser.AnimeGoParser
 
 public open class AnimeGoProvider(
-    private val animeGoParser: AnimeGoParser,
+    private var animeGoParser: AnimeGoParser? = null,
 ) : BaseZenithProvider(),
     MediaSourceProvider {
+
+    constructor() : this(null)
+
+    private fun ensureParser(): AnimeGoParser {
+        val existing = animeGoParser
+        if (existing != null) return existing
+        val ctx = context
+        val client = ctx?.httpClient ?: io.ktor.client.HttpClient()
+        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; isLenient = true }
+        val aniBoom = com.pilldev.zenith.providers.builtin.parser.AniBoomExtractor(client, json)
+        val parser = AnimeGoParser(
+            httpClient = client,
+            json = json,
+            appDispatchers = object : com.pilldev.zenith.domain.repository.AppDispatchers {
+                override val main = kotlinx.coroutines.Dispatchers.Main
+                override val io = kotlinx.coroutines.Dispatchers.IO
+                override val default = kotlinx.coroutines.Dispatchers.Default
+                override val unconfined = kotlinx.coroutines.Dispatchers.Unconfined
+            },
+            aniBoomExtractor = aniBoom,
+        )
+        animeGoParser = parser
+        return parser
+    }
+
     override val metadata: ProviderMetadata =
         ProviderMetadata(
             id = BuiltInProviders.ANIMEGO,
@@ -46,7 +71,7 @@ public open class AnimeGoProvider(
 
     override suspend fun test(context: ProviderContext): ProviderTestResult =
         measureTest {
-            val result = animeGoParser.getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
+            val result = ensureParser().getSources(54856, "Horimiya: Piece", "Хоримия: Кусочек")
             "AnimeGO активен. Найдено озвучек: ${result.sources.size}"
         }
 
@@ -56,7 +81,7 @@ public open class AnimeGoProvider(
         russianName: String?,
     ): ProviderResult<List<ProviderVideoSource>> =
         ProviderResult.of {
-            val result = animeGoParser.getSources(animeId, animeName, russianName)
+            val result = ensureParser().getSources(animeId, animeName, russianName)
             result.sources.map { it.toProviderVideoSource() }
         }
 
@@ -64,7 +89,7 @@ public open class AnimeGoProvider(
         episode: ProviderEpisode,
     ): ProviderResult<List<ProviderMediaStream>> =
         ProviderResult.of {
-            val streams = animeGoParser.resolveStream(episode.url)
+            val streams = ensureParser().resolveStream(episode.url)
             streams.ifEmpty {
                 listOf(
                     ProviderMediaStream(
@@ -76,4 +101,9 @@ public open class AnimeGoProvider(
                 )
             }
         }
+}
+
+public class AnimeGoProviderFactory : com.pilldev.zenith.provider.ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): com.pilldev.zenith.provider.ZenithProvider =
+        AnimeGoProvider()
 }

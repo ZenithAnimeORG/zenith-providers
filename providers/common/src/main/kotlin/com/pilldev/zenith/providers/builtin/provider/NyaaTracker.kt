@@ -6,6 +6,8 @@ import com.pilldev.zenith.domain.model.TorrentTitleParser
 import com.pilldev.zenith.domain.model.TranslationType
 import com.pilldev.zenith.domain.model.toProviderMirrorSpec
 import com.pilldev.zenith.provider.BaseZenithProvider
+import com.pilldev.zenith.provider.ZenithProvider
+import com.pilldev.zenith.provider.ZenithProviderFactory
 import com.pilldev.zenith.provider.context.ProviderContext
 import com.pilldev.zenith.provider.model.ProviderCapability
 import com.pilldev.zenith.provider.model.ProviderId
@@ -18,11 +20,18 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.encodeURLParameter
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
-class NyaaTracker
+open class NyaaTracker
     constructor(
-        private val client: HttpClient,
-        private val appDispatchers: com.pilldev.zenith.domain.repository.AppDispatchers,
+        private val client: HttpClient = HttpClient(),
+        private val appDispatchers: com.pilldev.zenith.domain.repository.AppDispatchers = object : com.pilldev.zenith.domain.repository.AppDispatchers {
+            override val main: CoroutineDispatcher = Dispatchers.Main
+            override val io: CoroutineDispatcher = Dispatchers.IO
+            override val default: CoroutineDispatcher = Dispatchers.Default
+            override val unconfined: CoroutineDispatcher = Dispatchers.Unconfined
+        },
         override val name: String = "Nyaa.si",
     ) : BaseZenithProvider(),
         TorrentTracker {
@@ -125,3 +134,7 @@ class NyaaTracker
             )
         }
     }
+
+public class NyaaTrackerFactory : ZenithProviderFactory {
+    override fun create(manifest: com.pilldev.zenith.provider.model.PluginManifest): ZenithProvider = NyaaTracker()
+}

@@ -18,7 +18,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.RuTrackerTracker",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.RuTrackerTrackerFactory",
   "settings": "settings.json",
   "pros": [
     "Огромная база",

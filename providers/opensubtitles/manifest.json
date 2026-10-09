@@ -17,7 +17,7 @@
     "jvm": "provider.jar",
     "android": "provider.dex"
   },
-  "entryClass": "com.pilldev.zenith.providers.builtin.provider.OpenSubtitlesProvider",
+  "entryClass": "com.pilldev.zenith.providers.builtin.provider.OpenSubtitlesProviderFactory",
   "settings": "settings.json",
   "pros": [
     "Миллионы субтитров на десятках языков"
